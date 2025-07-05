@@ -1,21 +1,13 @@
+import sys
+
 def word_counter(text):
     counter = {}
-    curr_word = ""
-    for char in text:
-        if char == ' ':
-            if curr_word != "":
-                if curr_word in counter:
-                    counter[curr_word] += 1
-                else:
-                    counter[curr_word] = 1
-                curr_word = ""
+    words = text.strip().split()
+    for word in words:
+        if word in counter:
+            counter[word] += 1
         else:
-            curr_word += char
-    if curr_word != "":
-        if curr_word in counter:
-            counter[curr_word] += 1
-        else:
-            counter[curr_word] = 1
+            counter[word] = 1
     return counter
 
 def by_value(item):
@@ -33,3 +25,32 @@ def create_code(dictionary):
         code[key] = i
         i += 1
     return code
+
+def create_compressed_text(text, dictionary):
+    compressed = str(code) + "\n"
+    words = text.split()
+    for word in words:
+        if word in dictionary:
+            compressed += str(dictionary[word]) + " "
+        else:
+            compressed += word + " "
+    return compressed.strip()
+
+
+text = (
+    "In the world of software development, clarity and simplicity are often more valuable than cleverness. "
+    "Clean code is not only easier to read, but also easier to maintain and less prone to bugs. "
+    "Developers who take the time to write readable, well-structured code often save time in the long run. "
+    "While performance is important, premature optimization can make code harder to understand and modify. "
+    "Therefore, focusing on good design principles, writing tests, and documenting your thought process "
+    "can lead to software that is both robust and adaptable."
+)
+
+counter_dict = word_counter(text)
+counter_dict = sort_dict_by_values(counter_dict)
+code = create_code(counter_dict)
+compressed_text = create_compressed_text(text, code)
+print(compressed_text)
+print(sys.getsizeof(text))
+print(sys.getsizeof(compressed_text))
+print(sys.getsizeof(code))
