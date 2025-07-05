@@ -25,3 +25,11 @@ def sort_dict_by_values(dictionary):
     sorted_items = sorted(dictionary.items(), key=by_value, reverse=True)
     sorted_dict = dict(sorted_items)
     return sorted_dict
+
+def create_code(dictionary):
+    code = {}
+    i = 0
+    for key in dictionary:
+        code[key] = i
+        i += 1
+    return code
