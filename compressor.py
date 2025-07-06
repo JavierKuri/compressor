@@ -1,4 +1,5 @@
 import sys
+import ast 
 
 def word_counter(text):
     counter = {}
@@ -34,8 +35,17 @@ def create_compressed_text(text, dictionary):
             compressed += str(dictionary[word]) + " "
         else:
             compressed += word + " "
-    return compressed.strip()
+    return compressed
 
+def get_code(compressed_text):
+    code = ""
+    for character in compressed_text:
+        if character == "}":
+            break
+        else:
+            code += character
+    code += "}"
+    return(code)
 
 text = (
     "In the world of software development, clarity and simplicity are often more valuable than cleverness. "
@@ -50,7 +60,8 @@ counter_dict = word_counter(text)
 counter_dict = sort_dict_by_values(counter_dict)
 code = create_code(counter_dict)
 compressed_text = create_compressed_text(text, code)
-print(compressed_text)
-print(sys.getsizeof(text))
-print(sys.getsizeof(compressed_text))
-print(sys.getsizeof(code))
+code = ast.literal_eval(get_code(compressed_text))
+
+#print(sys.getsizeof(text))
+#print(sys.getsizeof(compressed_text))
+#print(sys.getsizeof(code))
