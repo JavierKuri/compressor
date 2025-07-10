@@ -22,7 +22,7 @@ def main():
         compressor.compress_to_binary_file(text, code, args.output)
 
         print("Compression complete.")
-        print("Original size:", sys.getsizeof(text), "bytes")
+        print("Original size:", os.path.getsize(args.input), "bytes")
         print("Compressed size:", os.path.getsize(args.output), "bytes")
 
     elif args.mode == "decompress":
