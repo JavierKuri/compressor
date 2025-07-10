@@ -1,16 +1,23 @@
 import ast
 import pickle
 import os
+import re
+
+# Split text into words, whitespace, or punctuation tokens
+def tokenize(text):
+    pattern = r'(\w+|\s+|[^\w\s]+)'
+    tokens = re.findall(pattern, text)
+    return tokens
 
 # Counter for frequencies of each word/token
 def word_counter(text):
     counter = {}
-    words = text.strip().split()
-    for word in words:
-        if word in counter:
-            counter[word] += 1
+    tokens = tokenize(text)
+    for token in tokens:
+        if token in counter:
+            counter[token] += 1
         else:
-            counter[word] = 1
+            counter[token] = 1
     return counter
 
 # Sort dictionary by frequency values descending
@@ -34,13 +41,13 @@ def create_code(dictionary):
 # Compress to binary file 
 def compress_to_binary_file(text, dictionary, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
-    words = text.split()
+    tokens = tokenize(text)
     encoded = []
-    for word in words:
-        if word in dictionary:
-            encoded.append(dictionary[word])
+    for token in tokens:
+        if token in dictionary:
+            encoded.append(dictionary[token])
         else:
-            encoded.append(word)
+            encoded.append(token)
 
     with open(filename, "wb") as f:
         pickle.dump((dictionary, encoded), f)
@@ -58,4 +65,4 @@ def decompress_from_binary_file(filename):
         else:
             decompressed_words.append(token)
 
-    return " ".join(decompressed_words)
+    return "".join(decompressed_words)
