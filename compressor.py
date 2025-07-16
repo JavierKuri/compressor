@@ -1,7 +1,7 @@
-import ast
 import pickle
 import os
 import re
+import math
 
 # Split text into words, whitespace, or punctuation tokens
 def tokenize(text):
@@ -38,31 +38,43 @@ def create_code(dictionary):
         i += 1
     return code
 
-# Compress to binary file 
+# Helper to calculate bits needed to represent n tokens
+def bits_needed(n):
+    return max(1, math.ceil(math.log2(n)))
+
+# Bitwise compression
 def compress_to_binary_file(text, dictionary, filename):
     os.makedirs(os.path.dirname(filename), exist_ok=True)
     tokens = tokenize(text)
-    encoded = []
-    for token in tokens:
-        if token in dictionary:
-            encoded.append(dictionary[token])
-        else:
-            encoded.append(token)
+    encoded = [dictionary[token] for token in tokens]
+    max_index = max(dictionary.values())
+    bits_per_token = bits_needed(max_index + 1)
+    bit_string = ''
+    for index in encoded:
+        bit_string += format(index, f'0{bits_per_token}b')
+    padding = (8 - len(bit_string) % 8) % 8
+    bit_string += '0' * padding
 
+    byte_array = bytearray()
+    for i in range(0, len(bit_string), 8):
+        byte = int(bit_string[i:i+8], 2)
+        byte_array.append(byte)
     with open(filename, "wb") as f:
-        pickle.dump((dictionary, encoded), f)
+        pickle.dump((dictionary, bits_per_token, padding), f)
+        f.write(byte_array)
 
-# Decompress from binary file
+# Bitwise decompression
 def decompress_from_binary_file(filename):
     with open(filename, "rb") as f:
-        dictionary, encoded = pickle.load(f)
+        dictionary, bits_per_token, padding = pickle.load(f)
+        byte_data = f.read()
     reverse_code = {v: k for k, v in dictionary.items()}
-
-    decompressed_words = []
-    for token in encoded:
-        if isinstance(token, int):
-            decompressed_words.append(reverse_code[token])
-        else:
-            decompressed_words.append(token)
-
-    return "".join(decompressed_words)
+    bit_string = ''.join(format(byte, '08b') for byte in byte_data)
+    if padding:
+        bit_string = bit_string[:-padding]
+    tokens = []
+    for i in range(0, len(bit_string), bits_per_token):
+        bit_chunk = bit_string[i:i+bits_per_token]
+        index = int(bit_chunk, 2)
+        tokens.append(reverse_code[index])
+    return ''.join(tokens)
